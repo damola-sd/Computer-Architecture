@@ -28,28 +28,19 @@ class CPU:
         examples_dir = os.path.join(os.path.dirname(__file__), "examples/")
         file_path = os.path.join(examples_dir, file_name)
 
-        program = list()
         try:
             with open(file_path) as f:
                 for line in f:
-                    comment_split = line.split("#")
+                    num = line.split("#", 1)[0]
 
-                    num = comment_split[0].strip()
-
-                    if len(num) == 0:
-                        continue
-
-                    value = int(num, 2)
-
-                    program.append(value)
+                    if num.strip() != "":
+                       self.ram_write(address, int(num, 2))
+                       address += 1 
 
         except FileNotFoundError:
             print(f"{file_name} not found")
             sys.exit(2)
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
         
 
     def alu(self, op, reg_a, reg_b):
@@ -89,6 +80,7 @@ class CPU:
         PRN = 0b01000111
         LDI = 0b10000010
         HLT = 0b00000001
+        MUL = 0b10100010
         POP = 0b01000110
         PUSH = 0b01000101
 
@@ -107,15 +99,19 @@ class CPU:
                 self.pc += 2
             elif IR == HLT:
                 running = False
+            elif IR == MUL: 
+                self.alu("MUL", operand_a, operand_b)
+                print(self.reg[operand_a])
             elif IR == PUSH:
-                #Decrement the SP
+                #Decrement the Special Pointer
                 self.reg[self.sp] -= 1
                 value = self.reg(operand_a)
                 self.ram[self.reg[self.sp]] = value
 
             elif IR == POP:
-                value = self.ram[self.reg[self.sp]]
+                value = self.ram[self.reg[self.sp]] 
                 self.reg[operand_a] = value
+                #Increment the Special Pointer
                 self.reg[self.sp] += 1
 
 
