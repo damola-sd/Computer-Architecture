@@ -1,6 +1,7 @@
 """CPU functionality."""
 
 import sys
+import os
 
 class CPU:
     """Main CPU class."""
@@ -10,6 +11,8 @@ class CPU:
         self.ram = [0] * 256
         self.reg = [0] * 8
         self.pc = 0
+        self.sp = 7
+        self.reg[self.sp] = 244
 
     def ram_read(self, mem) :
         return self.ram[mem]
@@ -18,27 +21,36 @@ class CPU:
         self.ram[mem] = value
 
         
-    def load(self):
+    def load(self, file_name):
         """Load a program into memory."""
 
         address = 0
+        examples_dir = os.path.join(os.path.dirname(__file__), "examples/")
+        file_path = os.path.join(examples_dir, file_name)
 
-        # For now, we've just hardcoded a program:
+        program = list()
+        try:
+            with open(file_path) as f:
+                for line in f:
+                    comment_split = line.split("#")
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+                    num = comment_split[0].strip()
+
+                    if len(num) == 0:
+                        continue
+
+                    value = int(num, 2)
+
+                    program.append(value)
+
+        except FileNotFoundError:
+            print(f"{file_name} not found")
+            sys.exit(2)
 
         for instruction in program:
             self.ram[address] = instruction
             address += 1
-
+        
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -46,6 +58,8 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -75,6 +89,8 @@ class CPU:
         PRN = 0b01000111
         LDI = 0b10000010
         HLT = 0b00000001
+        POP = 0b01000110
+        PUSH = 0b01000101
 
         running = True
 
@@ -91,4 +107,16 @@ class CPU:
                 self.pc += 2
             elif IR == HLT:
                 running = False
+            elif IR == PUSH:
+                #Decrement the SP
+                self.reg[self.sp] -= 1
+                value = self.reg(operand_a)
+                self.ram[self.reg[self.sp]] = value
+
+            elif IR == POP:
+                value = self.ram[self.reg[self.sp]]
+                self.reg[operand_a] = value
+                self.reg[self.sp] += 1
+
+
 
