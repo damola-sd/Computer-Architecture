@@ -83,6 +83,8 @@ class CPU:
         MUL = 0b10100010
         POP = 0b01000110
         PUSH = 0b01000101
+        CALL = 0b01010000
+        RETURN = 0b00010001
 
         running = True
 
@@ -93,10 +95,8 @@ class CPU:
 
             if IR == LDI:
                 self.reg[operand_a] = operand_b
-                self.pc += 3
             elif IR == PRN:
                 print(self.reg[operand_a])
-                self.pc += 2
             elif IR == HLT:
                 running = False
             elif IR == MUL: 
@@ -113,6 +113,16 @@ class CPU:
                 self.reg[operand_a] = value
                 #Increment the Special Pointer
                 self.reg[self.sp] += 1
+
+            elif IR == CALL:
+                #Decrement the Special Pointer
+                self.reg[self.sp] -= 1
+                self.ram[self.reg[self.sp]] = self.pc + 2
+                self.pc = self.reg[self.ram[self.pc + 1]]
+            elif IR == RETURN:
+                #Increment the Special Pointer
+                self.reg[self.sp] += 1
+                self.pc = self.ram[self.reg[self.sp]]
 
 
 
