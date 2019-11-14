@@ -79,6 +79,7 @@ class CPU:
     def run(self):
         """Run the CPU."""
         IR = self.ram[self.pc]
+        ADD = 0b10100000
         PRN = 0b01000111
         LDI = 0b10000010
         HLT = 0b00000001
@@ -104,6 +105,10 @@ class CPU:
                 self.pc += 2
             elif IR == HLT:
                 running = False
+            elif IR == ADD: 
+                self.alu("ADD", self.ram[self.pc + 1], self.ram[self.pc + 2])
+                print(self.reg[self.ram[self.pc + 1]])
+                self.pc += 3
             elif IR == MUL: 
                 self.alu("MUL", self.ram[self.pc + 1], self.ram[self.pc + 2])
                 print(self.reg[self.ram[self.pc + 1]])
@@ -151,7 +156,7 @@ class CPU:
             
             elif IR == RET:
                 #Increment the Special Pointer
-                print('RET')
+                # print('RET')
                 return_addr = self.ram[self.reg[self.sp]]
                 self.pc = return_addr
 
