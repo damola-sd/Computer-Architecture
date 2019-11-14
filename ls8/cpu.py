@@ -25,6 +25,7 @@ class CPU:
         """Load a program into memory."""
 
         address = 0
+
         examples_dir = os.path.join(os.path.dirname(__file__), "examples/")
         file_path = os.path.join(examples_dir, file_name)
 
@@ -32,6 +33,7 @@ class CPU:
             with open(file_path) as f:
                 for line in f:
                     num = line.split("#", 1)[0]
+                    # print(num)
 
                     if num.strip() != "":
                        self.ram_write(address, int(num, 2))
@@ -84,7 +86,7 @@ class CPU:
         POP = 0b01000110
         PUSH = 0b01000101
         CALL = 0b01010000
-        RETURN = 0b00010001
+        RET = 0b00010001
 
         running = True
 
@@ -94,35 +96,70 @@ class CPU:
             operand_b = self.ram_read(self.pc + 2)
 
             if IR == LDI:
-                self.reg[operand_a] = operand_b
+                # print("Entered LDI Else If")
+                self.reg[self.ram[self.pc + 1]] = self.ram[self.pc + 2]
+                self.pc += 3
             elif IR == PRN:
-                print(self.reg[operand_a])
+                print(self.reg[self.ram[self.pc + 1]])
+                self.pc += 2
             elif IR == HLT:
                 running = False
             elif IR == MUL: 
-                self.alu("MUL", operand_a, operand_b)
-                print(self.reg[operand_a])
+                self.alu("MUL", self.ram[self.pc + 1], self.ram[self.pc + 2])
+                print(self.reg[self.ram[self.pc + 1]])
+                self.pc += 2
             elif IR == PUSH:
                 #Decrement the Special Pointer
+                # self.reg[self.sp] -= 1
+                # val = self.reg[self.ram[self.pc + 1]]
+                # self.ram[self.reg[self.sp]] = val
+                # self.pc += 2
+                reg = self.ram[self.pc + 1]
+                val = self.reg[reg]
+            
+                # Decrement the SP.
                 self.reg[self.sp] -= 1
-                value = self.reg(operand_a)
-                self.ram[self.reg[self.sp]] = value
+                # Copy the value in the given register to the address pointed to by SP.
+                self.ram[self.reg[self.sp]] = val
+                self.pc += 2
 
             elif IR == POP:
-                value = self.ram[self.reg[self.sp]] 
-                self.reg[operand_a] = value
-                #Increment the Special Pointer
+                # value = self.ram[self.reg[self.sp]]
+                # reg = self.ram[self.pc + 1]
+                # self.reg[self.ram[self.pc + 1]] = value
+                # #Increment the Special Pointer
+                # self.reg[self.sp] += 1
+                # self.pc += 2
+                reg = self.ram[self.pc + 1]
+                val = self.ram[self.reg[self.sp]]
+                # Copy the value from the address pointed to by SP to the given register.
+                self.reg[reg] = val
+                # Increment SP.
                 self.reg[self.sp] += 1
+                self.pc += 2 
+
 
             elif IR == CALL:
+                # print("Entered the Call ElIF")
                 #Decrement the Special Pointer
                 self.reg[self.sp] -= 1
+                
                 self.ram[self.reg[self.sp]] = self.pc + 2
-                self.pc = self.reg[self.ram[self.pc + 1]]
-            elif IR == RETURN:
+                register_num = self.ram[self.pc + 1]
+                subroutine = self.reg[register_num]
+                self.pc = subroutine
+            
+            elif IR == RET:
                 #Increment the Special Pointer
-                self.reg[self.sp] += 1
-                self.pc = self.ram[self.reg[self.sp]]
+                print('RET')
+                return_addr = self.ram[self.reg[self.sp]]
+                self.pc = return_addr
 
+                self.reg[self.sp] += 1
+
+            else:
+                print(f"Unknown Instruction")
+                sys.exit(1)
+                
 
 
