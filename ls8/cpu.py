@@ -13,6 +13,7 @@ class CPU:
         self.pc = 0
         self.sp = 7
         self.reg[self.sp] = 244
+        self.fl = 0b00000000
 
     def ram_read(self, mem) :
         return self.ram[mem]
@@ -53,6 +54,13 @@ class CPU:
         #elif op == "SUB": etc
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
+        elif op == "CMP":
+            if self.reg[reg_a] > self.reg[reg_b]:
+                self.fl = 0b00000010
+            elif self.reg[reg_a] == self.reg[reg_b]:
+                self.fl = 0b00000001
+            else:
+                self.fl = 0b00000100
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -88,6 +96,11 @@ class CPU:
         PUSH = 0b01000101
         CALL = 0b01010000
         RET = 0b00010001
+        CMP = 0b10100111
+        JMP = 0b01010100
+        JEQ = 0b01010101
+        JNE = 0b01010110
+
 
         running = True
 
@@ -161,6 +174,27 @@ class CPU:
                 self.pc = return_addr
 
                 self.reg[self.sp] += 1
+            elif IR == CMP:
+                data = self.ram_read(self.pc + 1)
+                value = self.ram_read(self.pc + 2)
+                self.alu("CMP", data, value)
+                self.pc += 3
+            elif IR == JMP:
+                data = self.ram_read(self.pc + 1)
+                self.pc = self.reg[data]
+            elif IR == JEQ:
+                data = self.ram_read(self.pc + 1)
+                if self.fl == 0b00000001:
+                    self.pc = self.reg[data]
+                else:
+                    self.pc += 2
+
+            elif IR == JNE:
+                data = self.ram_read(self.pc + 1)
+                if self.fl != 0b00000001:
+                    self.pc = self.reg[data]
+                else:
+                    self.pc += 2
 
             else:
                 print(f"Unknown Instruction")
