@@ -7,5 +7,5 @@ from cpu import *
 cpu = CPU()
 
 cpu.load("sctest.ls8")
-# cpu.load(stack.ls8)
+
 cpu.run()

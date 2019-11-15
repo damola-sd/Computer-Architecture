@@ -13,7 +13,7 @@ class CPU:
         self.pc = 0
         self.sp = 7
         self.reg[self.sp] = 244
-        self.fl = 0b00000000
+        self.flag = 0b00000000
 
     def ram_read(self, mem) :
         return self.ram[mem]
@@ -56,11 +56,11 @@ class CPU:
             self.reg[reg_a] *= self.reg[reg_b]
         elif op == "CMP":
             if self.reg[reg_a] > self.reg[reg_b]:
-                self.fl = 0b00000010
+                self.flag = 0b00000010
             elif self.reg[reg_a] == self.reg[reg_b]:
-                self.fl = 0b00000001
+                self.flag = 0b00000001
             else:
-                self.fl = 0b00000100
+                self.flag = 0b00000100
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -72,7 +72,7 @@ class CPU:
 
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
+            #self.flag,
             #self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
@@ -184,14 +184,14 @@ class CPU:
                 self.pc = self.reg[data]
             elif IR == JEQ:
                 data = self.ram_read(self.pc + 1)
-                if self.fl == 0b00000001:
+                if self.flag == 0b00000001:
                     self.pc = self.reg[data]
                 else:
                     self.pc += 2
 
             elif IR == JNE:
                 data = self.ram_read(self.pc + 1)
-                if self.fl != 0b00000001:
+                if self.flag != 0b00000001:
                     self.pc = self.reg[data]
                 else:
                     self.pc += 2
