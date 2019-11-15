@@ -61,6 +61,16 @@ class CPU:
                 self.flag = 0b00000001
             else:
                 self.flag = 0b00000100
+        elif op == "AND":
+            self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
+        elif op == "OR":
+            self.reg[reg_a] = self.reg[reg_a] | self.reg[reg_b]
+        elif op == "XOR":
+            self.reg[reg_a] = self.reg[reg_a] ^ self.reg[reg_b]
+        elif op == "SHL":
+            self.reg[reg_a] = self.reg[reg_a] << self.reg[reg_b]
+        elif op == "SHR":
+            self.reg[reg_a] = self.reg[reg_a] >> self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -100,6 +110,12 @@ class CPU:
         JMP = 0b01010100
         JEQ = 0b01010101
         JNE = 0b01010110
+        AND = 0b10101000
+        NOT = 0b01101001
+        OR = 0b10101010
+        XOR = 0b10101011
+        SHL = 0b10101100
+        SHR = 0b10101101
 
 
         running = True
@@ -122,6 +138,22 @@ class CPU:
                 self.alu("ADD", self.ram[self.pc + 1], self.ram[self.pc + 2])
                 print(self.reg[self.ram[self.pc + 1]])
                 self.pc += 3
+            # Stretch
+            # ANd
+            elif IR == AND:
+                self.alu("AND", self.ram[self.pc + 1], self.ram[self.pc + 2])
+            # OR Operator
+            elif IR == OR:
+                self.alu("OR", self.ram[self.pc + 1], self.ram[self.pc + 2])
+            # XOR Operator
+            elif IR == XOR:
+                self.alu("XOR", self.ram[self.pc + 1], self.ram[self.pc + 2])
+            # SHL - Shift Left
+            elif IR == SHL:
+                self.alu("SHL", self.ram[self.pc + 1], self.ram[self.pc + 2])
+            # SHR - Shift Right
+            elif IR == SHR:
+                self.alu("SHR", self.ram[self.pc + 1], self.ram[self.pc + 2])
             elif IR == MUL: 
                 self.alu("MUL", self.ram[self.pc + 1], self.ram[self.pc + 2])
                 print(self.reg[self.ram[self.pc + 1]])
