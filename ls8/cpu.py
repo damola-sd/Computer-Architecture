@@ -61,6 +61,8 @@ class CPU:
                 self.flag = 0b00000001
             else:
                 self.flag = 0b00000100
+        elif op == "INC":
+            self.reg[reg_a] += 1
         elif op == "AND":
             self.reg[reg_a] = self.reg[reg_a] & self.reg[reg_b]
         elif op == "OR":
@@ -116,7 +118,8 @@ class CPU:
         XOR = 0b10101011
         SHL = 0b10101100
         SHR = 0b10101101
-
+        INC = 0b01100101
+        PRA = 0b01001000
 
         running = True
 
@@ -138,6 +141,8 @@ class CPU:
                 self.alu("ADD", self.ram[self.pc + 1], self.ram[self.pc + 2])
                 print(self.reg[self.ram[self.pc + 1]])
                 self.pc += 3
+            elif IR == INC:
+                self.alu("INC", self.ram[self.pc + 1], None)
             # Stretch
             # ANd
             elif IR == AND:
@@ -227,10 +232,14 @@ class CPU:
                     self.pc = self.reg[data]
                 else:
                     self.pc += 2
+            elif IR == PRA:
+                data = self.ram[self.pc + 1]
+                print(chr(self.reg[data]))
+                self.pc += 2
 
-            else:
-                print(f"Unknown Instruction")
-                sys.exit(1)
+            # else:
+            #     print(f"Unknown Instruction")
+            #     sys.exit(1)
                 
 
 

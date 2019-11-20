@@ -6,6 +6,6 @@ from cpu import *
 
 cpu = CPU()
 
-cpu.load("sctest.ls8")
+cpu.load("binary.ls8")
 
 cpu.run()
